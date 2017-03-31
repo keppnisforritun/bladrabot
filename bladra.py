@@ -1,23 +1,29 @@
+from discord.ext import commands
+import asyncio
 import discord
 import secret
 
+description = "Hæ! Ég heiti Blaðra!"
+prefix = "!"
+
+bot = commands.Bot(command_prefix=prefix, description=description, pm_help=True)
 client = discord.Client()
 
-@client.event
-async def on_message(message):
-    # we do not want the bot to reply to itself
-    if message.author == client.user:
-        return
+init = [
+    "modules.chat"
+]
 
-    if message.content.startswith('!halló'):
-        msg = 'Halló {0.author.mention}'.format(message)
-        await client.send_message(message.channel, msg)
-
-@client.event
+@bot.event
 async def on_ready():
-    print('Logged in as')
-    print(client.user.name)
-    print(client.user.id)
-    print('------')
+    print("Tengdur! Jei!")
+    print("User: {}".format(bot.user.name))
+    print("ID: {}\n".format(bot.user.id))
 
-client.run(secret.token)
+if __name__ == "__main__":
+    for extension in init:
+        try:
+            bot.load_extension(extension)
+        except (AttributeError, ImportError) as ex:
+            print("Úps, náði ekki að hlaða {}\n{}".format(extension, str(ex)))
+
+bot.run(secret.token)
