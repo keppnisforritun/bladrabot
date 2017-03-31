@@ -1,4 +1,5 @@
 from discord.ext import commands
+from bs4 import BeautifulSoup
 from random import randint
 import async_timeout
 import urllib.parse
@@ -74,6 +75,33 @@ class Scrape():
         while self.math:
             message = self.math.pop()
             await self.bot.delete_message(message)
+
+    @commands.command()
+    async def kattis(self, *name : str):
+        """ Skilar stigafjölda íslenskum notanda á open.kattis.com """
+        name = " ".join(name)
+        if name == "":
+            return
+        doc = await download(self.bot.loop, "https://open.kattis.com/countries/ISL")
+        soup = BeautifulSoup(doc, "html5lib")
+        f = soup.find("td", string=name)
+        if f == None:
+            f = soup.find("a", string="href=\"/users/{}\"".format(name))
+            print(soup.find("a", string=name))
+            if f == None:
+                return
+
+        prev = list(f.previous_siblings)
+        rank = prev[1].text.replace(" ", "").strip()
+        siblings = list(f.next_siblings)
+        score = siblings[-2].text
+        
+        ranking = discord.Embed(
+            title="Kattis ranklist",
+            description="Rank: {}\nScore: {}".format(rank, score),
+            color=discord.Colour.purple())
+
+        await self.bot.say(embed=ranking)
 
 def setup(bot):
     bot.add_cog(Scrape(bot))
