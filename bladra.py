@@ -10,7 +10,8 @@ bot = commands.Bot(command_prefix=prefix, description=description, pm_help=True)
 client = discord.Client()
 
 init = [
-    "modules.chat"
+    "modules.chat",
+    "modules.scrape"
 ]
 
 @bot.event
