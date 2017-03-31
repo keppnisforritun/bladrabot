@@ -72,7 +72,7 @@ class Scrape():
     async def remove(self):
         """ Removes LaTeX images previously posted in the chat """
         while self.math:
-            message = math.pop()
+            message = self.math.pop()
             await self.bot.delete_message(message)
 
 def setup(bot):
