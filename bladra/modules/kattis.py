@@ -1,52 +1,79 @@
+from bladra.util import download, get_channels
+import discord
 from discord.ext import commands
 from bs4 import BeautifulSoup
-from random import randint
+import random
 import async_timeout
+import asyncio
 import urllib.parse
-import discord
 import aiohttp
 import string
 import os
-
-async def download(loop, url, parameters={}):
-    # A semi-generic download function, might need some tweaking later on
-    async with aiohttp.ClientSession(loop=loop) as session:
-        with async_timeout.timeout(10):
-            async with session.get(url, params=parameters) as resp:
-                return await resp.read()
 
 class Kattis():
     def __init__(self, bot, config):
         self.bot = bot
         self.config = config
+        self.lists = [ {} for _ in range(len(self.config['lists'])) ]
+        self.info = [ None for _ in range(len(self.config['lists'])) ]
+
+    async def monitor_lists(self):
+        await self.bot.wait_until_ready()
+
+        while not self.bot.is_closed:
+            for i, lst in enumerate(self.config['lists']):
+                res = await download(self.bot.loop, lst['url'], verify_ssl=False)
+                doc = BeautifulSoup(res, "html5lib")
+                site = doc.select('.header-title')[0].text.strip()
+                new = {}
+                for row in doc.select('.table-kattis tbody')[-1].find_all('tr'):
+                    cols = row.find_all('td')
+                    rank = int(cols[0].text)
+                    name = next(cols[1].children)
+                    score = cols[-1].text.strip()
+                    username = name.attrs['href'].split('/')[-1]
+                    name = name.text.strip()
+                    new[username] = (rank, name, score)
+
+                old = self.lists[i]
+                self.info[i] = (lst['url'], site)
+                self.lists[i] = new
+
+                for (username, (rank, name, score)) in sorted(new.items(), key=lambda x: -x[1][0]):
+                    if username in old and rank < old[username][0]:
+                        for channel in get_channels(self.bot, lst['channels']):
+                            congrats = random.choice([ 'Til hamingju!', 'Svalt!', 'Næs!', 'Vel gert!', 'Hellað.' ])
+                            msg = '%s hefur nú náð %s stigum á %s, og hoppar því upp í %d. sæti%s %s' % (name, score, site, rank, random.choice(['!', '.']), congrats)
+                            msg += ' [%s]' % lst['url'] # TODO: Better way to display the link?
+                            await self.bot.send_message(channel, msg)
+
+            await asyncio.sleep(self.config['interval'])
 
     @commands.command()
-    async def kattis(self, *name : str):
-        """ Skilar stigafjölda íslenskum notanda á open.kattis.com """
-        name = " ".join(name)
-        if name == "":
+    async def kattis(self, *query : str):
+        """Fletta upp íslenskum Kattis notendum"""
+
+        def normalize(s):
+            return s.lower().replace(' ', '')
+
+        query = normalize(''.join(query))
+        if len(query) < 4 or (len(query) < 6 and query.endswith('son')):
             return
-        doc = await download(self.bot.loop, "https://open.kattis.com/countries/ISL")
-        soup = BeautifulSoup(doc, "html5lib")
-        f = soup.find("td", string=name)
-        if f is None:
-            f = soup.find("a", string="href=\"/users/{}\"".format(name))
-            print(soup.find("a", string=name))
-            if f is None:
-                return
 
-        prev = list(f.previous_siblings)
-        rank = prev[1].text.replace(" ", "").strip()
-        siblings = list(f.next_siblings)
-        score = siblings[-2].text
+        for (lst, (url, site)) in zip(self.lists, self.info):
+            for (username, (rank, name, score)) in sorted(lst.items(), key=lambda x: -x[1][0]):
+                if query in normalize(username) or query in normalize(name):
 
-        ranking = discord.Embed(
-            title="Kattis ranklist",
-            description="Rank: {}\nScore: {}".format(rank, score),
-            color=discord.Colour.purple())
+                    ranking = discord.Embed(
+                        title=name,
+                        description="{}. sæti á {}\nmeð {} stig".format(rank, site, score),
+                        url=url,
+                        color=discord.Colour.purple())
 
-        await self.bot.say(embed=ranking)
+                    await self.bot.say(embed=ranking)
 
 def setup(bot, config):
-    bot.add_cog(Kattis(bot, config))
+    katt = Kattis(bot, config)
+    bot.loop.create_task(katt.monitor_lists())
+    bot.add_cog(katt)
 

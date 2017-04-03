@@ -17,6 +17,19 @@ modules = {
     },
     "kattis": {
         "enabled": True,
+
+        "interval": 3*minutes,
+
+        "lists": [
+            {
+                "channels": ["kattis"],
+                "url": "https://open.kattis.com/countries/ISL",
+            },
+            {
+                "channels": ["ioi-thjalfun"],
+                "url": "https://ioi.kattis.algo.is/ranklist",
+            },
+        ],
     },
     "events": {
         "enabled": True,

@@ -17,9 +17,9 @@ def get_channels(bot, names):
                 res.append(channel)
     return res
 
-async def download(loop, url, parameters={}):
+async def download(loop, url, parameters={}, verify_ssl=True):
     # A semi-generic download function, might need some tweaking later on
-    async with aiohttp.ClientSession(loop=loop) as session:
+    async with aiohttp.ClientSession(loop=loop, connector=aiohttp.TCPConnector(verify_ssl=verify_ssl)) as session:
         with async_timeout.timeout(10):
             async with session.get(url, params=parameters) as resp:
                 return await resp.read()
