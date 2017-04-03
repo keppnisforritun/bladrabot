@@ -21,31 +21,38 @@ class Kattis():
         await self.bot.wait_until_ready()
 
         while not self.bot.is_closed:
-            for i, lst in enumerate(self.config['lists']):
-                res = await download(self.bot.loop, lst['url'], verify_ssl=False)
-                doc = BeautifulSoup(res, "html5lib")
-                site = doc.select('.header-title')[0].text.strip()
-                new = {}
-                for row in doc.select('.table-kattis tbody')[-1].find_all('tr'):
-                    cols = row.find_all('td')
-                    rank = int(cols[0].text)
-                    name = next(cols[1].children)
-                    score = cols[-1].text.strip()
-                    username = name.attrs['href'].split('/')[-1]
-                    name = name.text.strip()
-                    new[username] = (rank, name, score)
+            try:
+                for i, lst in enumerate(self.config['lists']):
+                    try:
+                        res = await download(self.bot.loop, lst['url'], verify_ssl=False)
+                    except e:
+                        print(e)
+                        continue
+                    doc = BeautifulSoup(res, "html5lib")
+                    site = doc.select('.header-title')[0].text.strip()
+                    new = {}
+                    for row in doc.select('.table-kattis tbody')[-1].find_all('tr'):
+                        cols = row.find_all('td')
+                        rank = int(cols[0].text)
+                        name = next(cols[1].children)
+                        score = cols[-1].text.strip()
+                        username = name.attrs['href'].split('/')[-1]
+                        name = name.text.strip()
+                        new[username] = (rank, name, score)
 
-                old = self.lists[i]
-                self.info[i] = (lst['url'], site)
-                self.lists[i] = new
+                    old = self.lists[i]
+                    self.info[i] = (lst['url'], site)
+                    self.lists[i] = new
 
-                for (username, (rank, name, score)) in sorted(new.items(), key=lambda x: -x[1][0]):
-                    if username in old and rank < old[username][0]:
-                        for channel in get_channels(self.bot, lst['channels']):
-                            congrats = random.choice([ 'Til hamingju!', 'Svalt!', 'Næs!', 'Vel gert!', 'Hellað.' ])
-                            msg = '%s hefur nú náð %s stigum á %s, og hoppar því upp í %d. sæti%s %s' % (name, score, site, rank, random.choice(['!', '.']), congrats)
-                            msg += ' [%s]' % lst['url'] # TODO: Better way to display the link?
-                            await self.bot.send_message(channel, msg)
+                    for (username, (rank, name, score)) in sorted(new.items(), key=lambda x: -x[1][0]):
+                        if username in old and rank < old[username][0]:
+                            for channel in get_channels(self.bot, lst['channels']):
+                                congrats = random.choice([ 'Til hamingju!', 'Svalt!', 'Næs!', 'Vel gert!', 'Hellað.' ])
+                                msg = '%s hefur nú náð %s stigum á %s, og hoppar því upp í %d. sæti%s %s' % (name, score, site, rank, random.choice(['!', '.']), congrats)
+                                msg += ' [%s]' % lst['url'] # TODO: Better way to display the link?
+                                await self.bot.send_message(channel, msg)
+            except e:
+                print(e)
 
             await asyncio.sleep(self.config['interval'])
 
