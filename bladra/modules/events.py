@@ -5,6 +5,7 @@ import datetime
 import json
 import hashlib
 import discord
+import sys
 
 def describe_datetime(dt):
     day = [
@@ -107,8 +108,9 @@ async def event_calendar(bot, config):
                                                             'start_lt': t2.strftime(dtform),
                                                             'id_gt': lastid,
                                                         })
-                    except e:
-                        print(e)
+                    except:
+                        import traceback
+                        sys.stderr.write('%s\n' % traceback.format_exc())
                         continue
                     for ev in json.loads(res.decode('utf-8'))['objects']:
                         lastid = max(lastid, ev['id'])
@@ -132,8 +134,9 @@ async def event_calendar(bot, config):
 
             with open(data_path, 'w') as f:
                 json.dump(data, f)
-        except e:
-            print(e)
+        except:
+            import traceback
+            sys.stderr.write('%s\n' % traceback.format_exc())
 
         await asyncio.sleep(config['interval'])
 

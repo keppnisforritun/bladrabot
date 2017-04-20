@@ -26,8 +26,16 @@ modules = {
                 "url": "https://open.kattis.com/countries/ISL",
             },
             {
+                "channels": ["kattis"],
+                "url": "https://iceland.kattis.com/ranklist",
+            },
+            {
                 "channels": ["ioi-thjalfun"],
                 "url": "https://ioi.kattis.algo.is/ranklist",
+            },
+            {
+                "channels": ["icpc"],
+                "url": "https://icpc.kattis.com/countries/ISL",
             },
         ],
     },
@@ -52,6 +60,7 @@ modules = {
             {
                 "id": 3,
                 "name": "uva.onlinejudge.org",
+                "channels": ['icpc'],
             },
             {
                 "id": 12,
@@ -119,6 +128,7 @@ modules = {
             {
                 "id": 86,
                 "name": "icpc.baylor.edu",
+                "channels": ['icpc'],
             },
             {
                 "id": 93,
