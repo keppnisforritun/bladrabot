@@ -1,4 +1,3 @@
-
 data_dir = './data'
 discord_secret_token = "TODO: SECRET TOKEN"
 
@@ -7,6 +6,8 @@ seconds = 1
 minutes = 60 * seconds
 hours = 60 * minutes
 days = 24 * hours
+
+prefixes = ["!", "hey heimski botti "]
 
 modules = {
     "basics": {

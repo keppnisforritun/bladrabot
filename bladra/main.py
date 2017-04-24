@@ -7,7 +7,7 @@ import sys
 
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-bot = commands.Bot(command_prefix = "!", # TODO: Make this configurable? (With the possibility of using mentions)
+bot = commands.Bot(command_prefix = commands.when_mentioned_or(*config.prefixes),
                    description    = "Hæ! Ég heiti Blaðra!",
                    pm_help        = True)
 
