@@ -74,7 +74,14 @@ async def event_calendar(bot, config):
 
     dtform = '%Y-%m-%dT%H:%M:%S'
 
+    first = True
     while not bot.is_closed:
+
+        if first:
+            first = False
+        else:
+            await asyncio.sleep(config['interval'])
+
         try:
             for cal in config['calendars']:
                 channels = sorted(cal.get('channels', config.get('default_channels', [])))
@@ -137,8 +144,6 @@ async def event_calendar(bot, config):
         except:
             import traceback
             sys.stderr.write('%s\n' % traceback.format_exc())
-
-        await asyncio.sleep(config['interval'])
 
 def setup(bot, config):
     bot.loop.create_task(event_calendar(bot, config))

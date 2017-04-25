@@ -31,7 +31,14 @@ class Kattis():
     async def monitor_lists(self):
         await self.bot.wait_until_ready()
 
+        first = True
         while not self.bot.is_closed:
+
+            if first:
+                first = False
+            else:
+                await asyncio.sleep(self.config['interval'])
+
             try:
                 # TODO: Make configurable?
                 res = await download(self.bot.loop, 'https://open.kattis.com/problems?order=added&dir=desc')
@@ -108,8 +115,6 @@ class Kattis():
             except:
                 import traceback
                 sys.stderr.write('%s\n' % traceback.format_exc())
-
-            await asyncio.sleep(self.config['interval'])
 
     @commands.command()
     async def kattis(self, *query : str):
