@@ -73,6 +73,7 @@ async def event_calendar(bot, config):
             data = json.load(f)
 
     dtform = '%Y-%m-%dT%H:%M:%S'
+    limit = 1000
 
     first = True
     while not bot.is_closed:
@@ -83,6 +84,43 @@ async def event_calendar(bot, config):
             await asyncio.sleep(config['interval'])
 
         try:
+            now = datetime.datetime.now()
+            evs = {}
+            offset = 0
+            while True:
+                try:
+                    res = await download(bot.loop, 'https://clist.by/api/v1/contest/'
+                                                   '?username=%(username)s'
+                                                   '&api_key=%(api_key)s'
+                                                   '&limit=%(limit)d'
+                                                   '&offset=%(offset)d'
+                                                   '&start__gte=%(start_gte)s' % {
+                                                       'username': config['username'],
+                                                       'api_key': config['api_key'],
+                                                       'limit': limit,
+                                                       'offset': offset,
+                                                       'start_gte': now.strftime(dtform),
+                                                       })
+
+                    parsed = json.loads(res.decode('utf-8'))
+                    for ev in parsed['objects']:
+                        rid = ev['resource']['id']
+                        if rid not in evs:
+                            evs[rid] = []
+                        evs[rid].append(ev)
+
+                    if parsed['meta']['next'] is None:
+                        break
+                    offset += parsed['meta']['limit']
+
+                except:
+                    import traceback
+                    sys.stderr.write('%s\n' % traceback.format_exc())
+                    break
+
+            for k in evs:
+                evs[k] = sorted(evs[k], key=lambda e: e['id'])
+
             for cal in config['calendars']:
                 channels = sorted(cal.get('channels', config.get('default_channels', [])))
                 reminders = sorted(cal.get('reminders', config.get('default_reminders', [])))
@@ -100,33 +138,22 @@ async def event_calendar(bot, config):
 
                     t1 = datetime.datetime.now()
                     t2 = datetime.datetime.now() + datetime.timedelta(seconds=r)
-                    try:
-                        res = await download(bot.loop, 'http://clist.by/api/v1/contest/'
-                                                        '?username=%(username)s'
-                                                        '&api_key=%(api_key)s'
-                                                        '&resource__id=%(resource_id)d'
-                                                        '&start__gt=%(start_gt)s'
-                                                        '&start__lt=%(start_lt)s'
-                                                        '&id__gt=%(id_gt)d' % {
-                                                            'username': config['username'],
-                                                            'api_key': config['api_key'],
-                                                            'resource_id': cal['id'],
-                                                            'start_gt': t1.strftime(dtform),
-                                                            'start_lt': t2.strftime(dtform),
-                                                            'id_gt': lastid,
-                                                        })
-                    except:
-                        import traceback
-                        sys.stderr.write('%s\n' % traceback.format_exc())
-                        continue
-                    for ev in json.loads(res.decode('utf-8'))['objects']:
+
+                    for ev in evs.get(cal['id'], []):
+                        if ev['id'] <= lastid:
+                            continue
+
+                        dt_start = datetime.datetime.strptime(ev['start'], dtform)
+                        if dt_start < t1 or dt_start > t2:
+                            continue
+
                         lastid = max(lastid, ev['id'])
 
                         if ev['duration'] > 0:
-                            desc = 'Byrjar %s' % describe_datetime(datetime.datetime.strptime(ev['start'], dtform))
+                            desc = 'Byrjar %s' % describe_datetime(dt_start)
                             desc += '\nLengd: %s' % duration_to_string(ev['duration'] // 60)
                         else:
-                            desc = 'Birt %s' % describe_datetime(datetime.datetime.strptime(ev['start'], dtform))
+                            desc = 'Birt %s' % describe_datetime(dt_start)
 
                         emb = discord.Embed(
                             url         = ev['href'],
