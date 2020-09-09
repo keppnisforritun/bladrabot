@@ -1,4 +1,5 @@
 from discord.ext import commands
+from discord import File
 from bladra.util import download
 from bs4 import BeautifulSoup
 from random import randint
@@ -30,8 +31,9 @@ class LaTeX(commands.Cog):
         self.bot = bot
         self.math = []
 
+# tested
     @commands.command()
-    async def latex(self, *equation : str):
+    async def latex(self, ctx, *equation : str):
         """ Parses LaTeX markup into a png via Google Charts 
             \\displaystyle is forced for nicer and bigger equations """
         equation = " ".join(equation)
@@ -60,7 +62,7 @@ class LaTeX(commands.Cog):
             f.write(res)
         try:
             # self.math.append(await self.bot.upload(filename))
-            await self.bot.upload(filename)
+            await ctx.send(file = File(filename))
         finally:
             os.remove(filename)
 
