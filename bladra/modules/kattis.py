@@ -103,7 +103,7 @@ class Kattis(commands.Cog):
                             msg = '%s var að komast yfir %s stig á %s! %sfalt húrra!' % (acc.name, int(acc.score / 1000) * 1000, site, arr[hurr])
                             msg += ' [%s]' % lst['url'] # TODO: Better way to display the link?
                             for channel in get_channels(self.bot, lst['channels']):
-                                await channel.sned(msg)
+                                await channel.send(msg)
                             for _ in range(hurr):
                                 await asyncio.sleep(1)
                                 for channel in get_channels(self.bot, lst['channels']):
