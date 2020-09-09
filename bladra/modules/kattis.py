@@ -20,7 +20,8 @@ class Account():
         self.thousand_reached = 0
         self.last_score = 0
 
-class Kattis():
+# https://stackoverflow.com/a/20019382
+class Kattis(commands.Cog):
     def __init__(self, bot, config):
         self.bot = bot
         self.config = config
@@ -32,7 +33,7 @@ class Kattis():
         await self.bot.wait_until_ready()
 
         first = True
-        while not self.bot.is_closed:
+        while not self.bot.is_closed():
 
             if first:
                 first = False
@@ -51,8 +52,7 @@ class Kattis():
                     pid = row.attrs['href'].split('/')[-1]
                     title = row.text
                     if self.new_problems and pid not in self.new_problems:
-                        await self.bot.send_message(kattis_channel,
-                                'Nýtt dæmi: %s [https://open.kattis.com/problems/%s]' % (title, pid))
+                        await kattis_channel.send('Nýtt dæmi: %s [https://open.kattis.com/problems/%s]' % (title, pid))
                     new.add(pid)
 
                 self.new_problems = new
@@ -95,7 +95,7 @@ class Kattis():
                                 congrats = random.choice([ 'Til hamingju!', 'Svalt!', 'Næs!', 'Vel gert!', 'Hellað.', 'Sææælll', 'Magnað.', 'Legendary.' ])
                                 msg = '%s hefur nú náð %s stigum á %s, og hoppar því upp í %d. sæti%s %s' % (acc.name, acc.score, site, acc.rank, random.choice(['!', '.']), congrats)
                                 msg += ' [%s]' % lst['url'] # TODO: Better way to display the link?
-                                await self.bot.send_message(channel, msg)
+                                await channel.send(msg)
                         if int(acc.score / 1000) > max(int(old.score / 1000), acc.thousand_reached):
                             acc.thousand_reached = int(acc.score / 1000)
                             arr = ['Núll', 'Ein', 'Tvö', 'Þre', 'Fjór', 'Fimm', 'Sex', 'Sjö', 'Átt', 'Ní', 'Tí']
@@ -103,11 +103,11 @@ class Kattis():
                             msg = '%s var að komast yfir %s stig á %s! %sfalt húrra!' % (acc.name, int(acc.score / 1000) * 1000, site, arr[hurr])
                             msg += ' [%s]' % lst['url'] # TODO: Better way to display the link?
                             for channel in get_channels(self.bot, lst['channels']):
-                                await self.bot.send_message(channel, msg)
+                                await channel.send(msg)
                             for _ in range(hurr):
                                 await asyncio.sleep(1)
                                 for channel in get_channels(self.bot, lst['channels']):
-                                    await self.bot.send_message(channel, 'Hipp, hipp, húrra!')
+                                    await channel.send('Hipp, hipp, húrra!')
 
                     old = self.lists[i]
                     self.info[i] = (lst['url'], site)
@@ -116,8 +116,9 @@ class Kattis():
                 import traceback
                 sys.stderr.write('%s\n' % traceback.format_exc())
 
+# tested
     @commands.command()
-    async def kattis(self, *query : str):
+    async def kattis(self, ctx, *query : str):
         """Fletta upp íslenskum Kattis notendum"""
 
         def normalize(s):
@@ -141,8 +142,9 @@ class Kattis():
                         url=url,
                         color=discord.Colour.purple())
 
-                    await self.bot.say(embed=ranking)
+                    await ctx.send(embed=ranking)
 
+# skv docs á setup(...) bara að taka inn bot
 def setup(bot, config):
     katt = Kattis(bot, config)
     bot.loop.create_task(katt.monitor_lists())

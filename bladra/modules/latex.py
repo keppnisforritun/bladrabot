@@ -1,4 +1,5 @@
 from discord.ext import commands
+from discord import File
 from bladra.util import download
 from bs4 import BeautifulSoup
 from random import randint
@@ -24,13 +25,15 @@ def generate_filename(extension=".png"):
         s += string.hexdigits[randint(0, l)]
     return s + extension
 
-class LaTeX():
+# https://stackoverflow.com/a/20019382
+class LaTeX(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
         self.math = []
 
+# tested
     @commands.command()
-    async def latex(self, *equation : str):
+    async def latex(self, ctx, *equation : str):
         """ Parses LaTeX markup into a png via Google Charts 
             \\displaystyle is forced for nicer and bigger equations """
         equation = " ".join(equation)
@@ -59,7 +62,7 @@ class LaTeX():
             f.write(res)
         try:
             # self.math.append(await self.bot.upload(filename))
-            await self.bot.upload(filename)
+            await ctx.send(file = File(filename))
         finally:
             os.remove(filename)
 
@@ -70,6 +73,8 @@ class LaTeX():
     #         message = self.math.pop()
     #         await self.bot.delete_message(message)
 
-def setup(bot, config):
+
+# skv docs á setup(...) bara að taka inn bot
+def setup(bot):
     bot.add_cog(LaTeX(bot))
 
