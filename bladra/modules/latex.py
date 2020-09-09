@@ -24,7 +24,8 @@ def generate_filename(extension=".png"):
         s += string.hexdigits[randint(0, l)]
     return s + extension
 
-class LaTeX():
+# https://stackoverflow.com/a/20019382
+class LaTeX(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
         self.math = []
@@ -70,6 +71,8 @@ class LaTeX():
     #         message = self.math.pop()
     #         await self.bot.delete_message(message)
 
-def setup(bot, config):
+
+# skv docs á setup(...) bara að taka inn bot
+def setup(bot):
     bot.add_cog(LaTeX(bot))
 

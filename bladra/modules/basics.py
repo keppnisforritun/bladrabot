@@ -1,7 +1,8 @@
 from discord.ext import commands
 import urllib.parse
 
-class Basics():
+# https://stackoverflow.com/a/55701877
+class Basics(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
 
@@ -14,6 +15,7 @@ class Basics():
         search = ' '.join(search)
         await self.bot.say("https://wiki.algo.is/_search?%s" % urllib.parse.urlencode({'patterns': search}))
 
-def setup(bot, config):
+# skv docs á setup(...) bara að taka inn bot
+def setup(bot):
     bot.add_cog(Basics(bot))
 

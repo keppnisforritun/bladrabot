@@ -20,7 +20,8 @@ class Account():
         self.thousand_reached = 0
         self.last_score = 0
 
-class Kattis():
+# https://stackoverflow.com/a/20019382
+class Kattis(commands.Cog):
     def __init__(self, bot, config):
         self.bot = bot
         self.config = config
@@ -143,6 +144,7 @@ class Kattis():
 
                     await self.bot.say(embed=ranking)
 
+# skv docs á setup(...) bara að taka inn bot
 def setup(bot, config):
     katt = Kattis(bot, config)
     bot.loop.create_task(katt.monitor_lists())
