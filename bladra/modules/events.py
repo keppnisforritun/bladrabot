@@ -161,7 +161,7 @@ async def event_calendar(bot, config):
                             description = desc,
                             color       = discord.Colour.purple())
                         for channel in get_channels(bot, channels):
-                            await bot.send_message(channel, embed=emb)
+                            await channel.send(embed=emb)
 
                     last[i] = lastid
                 data[key] = last
