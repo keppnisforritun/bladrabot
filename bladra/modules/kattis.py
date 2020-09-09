@@ -33,7 +33,7 @@ class Kattis(commands.Cog):
         await self.bot.wait_until_ready()
 
         first = True
-        while not self.bot.is_closed:
+        while not self.bot.is_closed():
 
             if first:
                 first = False
@@ -45,6 +45,8 @@ class Kattis(commands.Cog):
                 res = await download(self.bot.loop, 'https://open.kattis.com/problems?order=added&dir=desc')
                 doc = BeautifulSoup(res, "html5lib")
 
+                # spurning hvað þetta á að gera?
+                # get_channel(...) crashar alltaf um leið því það kallar á bot.servers sem ég sé hvergi að sé skilgreint
                 kattis_channel = get_channel(self.bot, 'kattis')
 
                 new = set()
@@ -117,8 +119,9 @@ class Kattis(commands.Cog):
                 import traceback
                 sys.stderr.write('%s\n' % traceback.format_exc())
 
+# tested
     @commands.command()
-    async def kattis(self, *query : str):
+    async def kattis(self, ctx, *query : str):
         """Fletta upp íslenskum Kattis notendum"""
 
         def normalize(s):
@@ -142,7 +145,7 @@ class Kattis(commands.Cog):
                         url=url,
                         color=discord.Colour.purple())
 
-                    await self.bot.say(embed=ranking)
+                    await ctx.send(embed=ranking)
 
 # skv docs á setup(...) bara að taka inn bot
 def setup(bot, config):
