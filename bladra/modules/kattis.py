@@ -52,8 +52,7 @@ class Kattis(commands.Cog):
                     pid = row.attrs['href'].split('/')[-1]
                     title = row.text
                     if self.new_problems and pid not in self.new_problems:
-                        await self.bot.send_message(kattis_channel,
-                                'Nýtt dæmi: %s [https://open.kattis.com/problems/%s]' % (title, pid))
+                        await kattis_channel.send('Nýtt dæmi: %s [https://open.kattis.com/problems/%s]' % (title, pid))
                     new.add(pid)
 
                 self.new_problems = new
@@ -96,7 +95,7 @@ class Kattis(commands.Cog):
                                 congrats = random.choice([ 'Til hamingju!', 'Svalt!', 'Næs!', 'Vel gert!', 'Hellað.', 'Sææælll', 'Magnað.', 'Legendary.' ])
                                 msg = '%s hefur nú náð %s stigum á %s, og hoppar því upp í %d. sæti%s %s' % (acc.name, acc.score, site, acc.rank, random.choice(['!', '.']), congrats)
                                 msg += ' [%s]' % lst['url'] # TODO: Better way to display the link?
-                                await self.bot.send_message(channel, msg)
+                                await channel.send(msg)
                         if int(acc.score / 1000) > max(int(old.score / 1000), acc.thousand_reached):
                             acc.thousand_reached = int(acc.score / 1000)
                             arr = ['Núll', 'Ein', 'Tvö', 'Þre', 'Fjór', 'Fimm', 'Sex', 'Sjö', 'Átt', 'Ní', 'Tí']
@@ -104,11 +103,11 @@ class Kattis(commands.Cog):
                             msg = '%s var að komast yfir %s stig á %s! %sfalt húrra!' % (acc.name, int(acc.score / 1000) * 1000, site, arr[hurr])
                             msg += ' [%s]' % lst['url'] # TODO: Better way to display the link?
                             for channel in get_channels(self.bot, lst['channels']):
-                                await self.bot.send_message(channel, msg)
+                                await channel.sned(msg)
                             for _ in range(hurr):
                                 await asyncio.sleep(1)
                                 for channel in get_channels(self.bot, lst['channels']):
-                                    await self.bot.send_message(channel, 'Hipp, hipp, húrra!')
+                                    await channel.send('Hipp, hipp, húrra!')
 
                     old = self.lists[i]
                     self.info[i] = (lst['url'], site)
