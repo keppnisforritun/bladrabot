@@ -45,8 +45,6 @@ class Kattis(commands.Cog):
                 res = await download(self.bot.loop, 'https://open.kattis.com/problems?order=added&dir=desc')
                 doc = BeautifulSoup(res, "html5lib")
 
-                # spurning hvað þetta á að gera?
-                # get_channel(...) crashar alltaf um leið því það kallar á bot.servers sem ég sé hvergi að sé skilgreint
                 kattis_channel = get_channel(self.bot, 'kattis')
 
                 new = set()
