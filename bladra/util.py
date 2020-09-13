@@ -2,7 +2,7 @@ import async_timeout
 import aiohttp
 
 def get_channel(bot, name):
-    for server in bot.servers:
+    for server in bot.guilds:
         for channel in server.channels:
             if channel.name == name:
                 return channel
@@ -11,7 +11,7 @@ def get_channel(bot, name):
 def get_channels(bot, names):
     names = set(names)
     res = []
-    for server in bot.servers:
+    for server in bot.guilds:
         for channel in server.channels:
             if channel.name in names:
                 res.append(channel)

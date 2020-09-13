@@ -76,7 +76,7 @@ async def event_calendar(bot, config):
     limit = 1000
 
     first = True
-    while not bot.is_closed:
+    while not bot.is_closed():
 
         if first:
             first = False
