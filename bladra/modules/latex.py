@@ -25,13 +25,11 @@ def generate_filename(extension=".png"):
         s += string.hexdigits[randint(0, l)]
     return s + extension
 
-# https://stackoverflow.com/a/20019382
 class LaTeX(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
         self.math = []
 
-# tested
     @commands.command()
     async def latex(self, ctx, *equation : str):
         """ Parses LaTeX markup into a png via Google Charts 
@@ -74,7 +72,6 @@ class LaTeX(commands.Cog):
     #         await self.bot.delete_message(message)
 
 
-# skv docs á setup(...) bara að taka inn bot
-def setup(bot):
-    bot.add_cog(LaTeX(bot))
+async def setup(bot, config):
+    await bot.add_cog(LaTeX(bot))
 

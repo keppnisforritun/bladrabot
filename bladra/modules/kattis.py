@@ -20,7 +20,6 @@ class Account():
         self.thousand_reached = 0
         self.last_score = 0
 
-# https://stackoverflow.com/a/20019382
 class Kattis(commands.Cog):
     def __init__(self, bot, config):
         self.bot = bot
@@ -48,7 +47,7 @@ class Kattis(commands.Cog):
                 kattis_channel = get_channel(self.bot, 'kattis')
 
                 new = set()
-                for row in doc.select('.problem_list .name_column a'):
+                for row in doc.select('.table2 tbody tr td:first-child a'):
                     pid = row.attrs['href'].split('/')[-1]
                     title = row.text
                     if self.new_problems and pid not in self.new_problems:
@@ -69,12 +68,16 @@ class Kattis(commands.Cog):
                         sys.stderr.write('%s\n' % traceback.format_exc())
                         continue
                     doc = BeautifulSoup(res, "html5lib")
-                    site = doc.select('.header-title')[0].text.strip()
+                    site = doc.select('.logo-container-text')[0].text.strip()
+                    if site == 'Kattis':
+                        site = 'Open Kattis'
+                    else:
+                        site = site + ' Kattis'
                     new = {}
-                    for row in doc.select('.table-kattis tbody')[-1].find_all('tr'):
+                    for row in doc.select('#top_users tbody tr'):
                         cols = row.find_all('td')
                         rank = int(cols[0].text)
-                        name = next(cols[1].children)
+                        name = cols[1].find('a')
                         score = float(cols[-1].text.strip())
                         username = name.attrs['href'].split('/')[-1]
                         name = name.text.strip()
@@ -116,7 +119,6 @@ class Kattis(commands.Cog):
                 import traceback
                 sys.stderr.write('%s\n' % traceback.format_exc())
 
-# tested
     @commands.command()
     async def kattis(self, ctx, *query : str):
         """Fletta upp íslenskum Kattis notendum"""
@@ -144,9 +146,8 @@ class Kattis(commands.Cog):
 
                     await ctx.send(embed=ranking)
 
-# skv docs á setup(...) bara að taka inn bot
-def setup(bot, config):
+async def setup(bot, config):
     katt = Kattis(bot, config)
     bot.loop.create_task(katt.monitor_lists())
-    bot.add_cog(katt)
+    await bot.add_cog(katt)
 

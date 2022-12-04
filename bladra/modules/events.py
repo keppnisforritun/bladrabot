@@ -172,6 +172,6 @@ async def event_calendar(bot, config):
             import traceback
             sys.stderr.write('%s\n' % traceback.format_exc())
 
-def setup(bot, config):
+async def setup(bot, config):
     bot.loop.create_task(event_calendar(bot, config))
 
